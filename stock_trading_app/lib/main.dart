@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:stock_trading_app/homepage.dart';
 import 'package:stock_trading_app/testpage2.dart';
 import 'package:stock_trading_app/testpage3.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'dart:convert';
+
+import 'bloc/stock_bloc.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,12 +19,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const TestPage2(),
+    return BlocProvider(
+      create: (context) => StockBloc(),
+      child: MaterialApp(
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: TestPage3()),
     );
   }
 }
@@ -50,6 +57,13 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void printdata(var a) {
+    var data = json.decode(a);
+    for (var item in data["data"]) {
+      print(item["p"]);
+    }
+  }
+
   final channel = WebSocketChannel.connect(
     Uri.parse('wss://ws.finnhub.io?token=c6av1iaad3ieq36s0q9g'),
   );
@@ -62,7 +76,12 @@ class _MyHomePageState extends State<MyHomePage> {
       body: StreamBuilder(
         stream: channel.stream,
         builder: (context, snapshot) {
-          snapshot.hasData ? print('${snapshot.data}') : print("null");
+          print(
+              "\n================================================================\n");
+
+          snapshot.hasData ? printdata(snapshot.data) : print("null");
+          print(
+              "\n================================================================\n");
           return Text(snapshot.hasData ? '${snapshot.data}' : '');
         },
       ),
