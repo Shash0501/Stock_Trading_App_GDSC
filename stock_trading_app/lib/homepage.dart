@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stock_trading_app/constants.dart/channels.dart';
 import 'package:stock_trading_app/constants.dart/common_crypto.dart';
+import 'package:stock_trading_app/details_page.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:http/http.dart' as http;
 
@@ -28,6 +29,7 @@ class _HomePageState extends State<HomePage> {
       var response = await http.get(Uri.parse(
           "https://finnhub.io/api/v1/search?q=Binance$searchText&token=c6av1iaad3ieq36s0q9g"));
       var data = json.decode(response.body);
+      print(data["result"]);
       searchedcrypto = data["result"];
     } catch (e) {
       print(e);
@@ -39,7 +41,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("NITK CRYPTO"),
+        title: const Text("NITK CRYPTO"),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
@@ -56,32 +58,43 @@ class _HomePageState extends State<HomePage> {
                 shrinkWrap: true,
                 itemCount: crypto_symbols.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Center(
-                          child: Text(
-                            crypto_symbols[index].description.split(" ")[1],
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => DetailsPage(
+                                    resolution: "1",
+                                    stockName: crypto_symbols[index].symbol,
+                                  )));
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Center(
+                            child: Text(
+                              crypto_symbols[index].description.split(" ")[1],
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            gradient: RadialGradient(
+                              colors: [
+                                Colors.amber[300]!,
+                                Colors.amber[400]!,
+                                Colors.amber[600]!,
+                                Colors.amber[700]!,
+                              ],
+                              stops: const [0.4, 0.6, 0.8, 1],
+                            )),
                       ),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          gradient: RadialGradient(
-                            colors: [
-                              Colors.amber[300]!,
-                              Colors.amber[400]!,
-                              Colors.amber[600]!,
-                              Colors.amber[700]!,
-                            ],
-                            stops: const [0.4, 0.6, 0.8, 1],
-                          )),
                     ),
                   );
                 }),
@@ -119,7 +132,7 @@ class _HomePageState extends State<HomePage> {
                                 _textFieldController.clear();
                                 setState(() {
                                   searchText = "";
-                                  _searchedcryptoSymbols = [] as Future<List>?;
+                                  _searchedcryptoSymbols = null;
                                 });
                               },
                             ),
@@ -166,9 +179,20 @@ class _HomePageState extends State<HomePage> {
               child: ListView.builder(
                 itemCount: snapshot.data!.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    title: Text(snapshot.data![index]['symbol']),
-                    subtitle: Text(snapshot.data![index]['description']),
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => DetailsPage(
+                                    resolution: "1",
+                                    stockName: snapshot.data![index]['symbol'],
+                                  )));
+                    },
+                    child: ListTile(
+                      title: Text(snapshot.data![index]['symbol']),
+                      subtitle: Text(snapshot.data![index]['description']),
+                    ),
                   );
                 },
               ),

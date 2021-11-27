@@ -190,7 +190,7 @@ class _DetailsPageState extends State<DetailsPage> {
                         return Column(
                           children: [
                             AspectRatio(
-                              aspectRatio: 1.2,
+                              aspectRatio: 1.0,
                               child: Candlesticks(
                                 onIntervalChange: (String value) async {
                                   print(value);
