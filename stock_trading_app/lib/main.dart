@@ -24,9 +24,11 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
           title: 'Flutter Demo',
           theme: ThemeData(
-            primarySwatch: Colors.blue,
+            brightness: Brightness.dark,
           ),
-          home: TestPage3()),
+          home: TestPage3(
+            stockName: "BINANCE:ETHUSDT",
+          )),
     );
   }
 }
@@ -41,20 +43,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
   void _incrementCounter() {
     channel.sink.add('{"type": "subscribe", "symbol": "BINANCE:BTCUSDT"}');
-    setState(() {
-      _counter++;
-    });
   }
 
-  void _decrementCounter() {
+  void _closeChannel() {
     channel.sink.close();
-    setState(() {
-      _counter++;
-    });
   }
 
   void printdata(var a) {
@@ -95,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           FloatingActionButton(
             heroTag: 'decrement',
-            onPressed: _decrementCounter,
+            onPressed: _closeChannel,
             tooltip: 'Increment',
             child: const Icon(Icons.delete),
           ),

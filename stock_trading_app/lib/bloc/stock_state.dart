@@ -16,7 +16,7 @@ class Loading extends StockState {
 }
 
 class StockSymbolsLoaded extends StockState {
-  List<StockSymbol> stocks;
+  List<CryptoSymbol> stocks;
   StockSymbolsLoaded({required this.stocks});
   @override
   // TODO: implement props
