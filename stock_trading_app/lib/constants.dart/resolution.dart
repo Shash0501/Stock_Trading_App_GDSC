@@ -8,14 +8,6 @@ Map<String, int> resolutionMap = {
   "W": 24 * 60 * 7,
   "M": 24 * 60 * 28,
 };
-//  "1m",
-//                                   "5m",
-//                                   "15m",
-//                                   "30m",
-//                                   "1h",
-//                                   "1w",
-//                                   "1M",
-//                                   "1d"
 
 Map<String, String> resolutionMap2 = {
   "1m": "1",

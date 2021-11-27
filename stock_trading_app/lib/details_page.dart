@@ -9,14 +9,15 @@ import 'package:flutter/material.dart';
 import 'package:candlesticks/candlesticks.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-class TestPage3 extends StatefulWidget {
+class DetailsPage extends StatefulWidget {
   String stockName;
-  TestPage3({required this.stockName});
+  String resolution;
+  DetailsPage({required this.stockName, required this.resolution});
   @override
-  _TestPage3State createState() => _TestPage3State();
+  _DetailsPageState createState() => _DetailsPageState();
 }
 
-class _TestPage3State extends State<TestPage3> {
+class _DetailsPageState extends State<DetailsPage> {
   List<Candle> candles = [];
   List<double> points = [];
   double volume = 0;
@@ -26,7 +27,7 @@ class _TestPage3State extends State<TestPage3> {
   double currentOpen = 0;
   double previousClose = 0;
   bool isDown = false;
-  String resolution = "1";
+  // String resolution = "1";
   late int last_updated;
   Future<List<Candle>> getdata(String res) async {
     print("Getting initial Data $res");
@@ -37,14 +38,11 @@ class _TestPage3State extends State<TestPage3> {
     a = a ~/ 1000;
     b = b ~/ 1000;
     last_updated = a;
-    // print(b);
-    // print(a);
-    // print(resolution);
     var response = await http.get(Uri.parse(
         "https://finnhub.io/api/v1/stock/candle?symbol=${widget.stockName}&resolution=$res&from=$b&to=$a&token=c6av1iaad3ieq36s0q9g"));
+    print(
+        "https://finnhub.io/api/v1/stock/candle?symbol=${widget.stockName}&resolution=$res&from=$b&to=$a&token=c6av1iaad3ieq36s0q9g");
     var data = json.decode(response.body);
-    // print("${data["o"].length} , ${data["c"].length},${data["h"].length}");
-
     for (int i = data["o"].length - 1; i >= 0; i--) {
       final date = DateTime.fromMillisecondsSinceEpoch(data["t"][i] * 1000);
       candles.add(Candle(
@@ -55,38 +53,20 @@ class _TestPage3State extends State<TestPage3> {
           volume: (data["v"][i]).toDouble(),
           date: date));
     }
-
     return (candles);
   }
 
-  printcandledata(Candle candle) {
-    print(candle.open);
-    print(candle.high);
-    print(candle.low);
-    print(candle.close);
-    print(candle.volume);
-    print(candle.date);
-  }
-
   bool addtocandle(var a) {
-    // print(a);
-    // print(candles.length);
     var data = json.decode(a);
-    // print(
-    //     "====================================================================================");
     var last1 =
         data["data"] != null ? data["data"][data["data"].length - 1] : "exit";
-
     if (last1 == "exit") {
       return false;
     }
-    // print(data["data"].last["t"]);
-    // print(last_updated);
-    // print((data["data"].last["t"] / 1000).toDouble() - last_updated.toDouble());
-    print((data["data"].last["t"] / 1000) - last_updated.toDouble());
+    // print((data["data"].last["t"] / 1000) - last_updated.toDouble());
     currentPrice = data["data"].last["p"].toDouble();
     if ((data["data"].last["t"] / 1000).toDouble() - last_updated.toDouble() <=
-        60 * resolutionMap[resolution]!) {
+        60 * resolutionMap[widget.resolution]!) {
       points.add(data["data"].last["p"].toDouble());
       volume += data["data"].last["v"].toDouble();
       double high = data["data"].last["p"].toDouble() > candles[0].high
@@ -116,9 +96,9 @@ class _TestPage3State extends State<TestPage3> {
       points.sort();
       double high = points.last.toDouble();
       double low = points.first.toDouble();
-      debugPrint("Added a candle");
-      debugPrint(DateTime.fromMillisecondsSinceEpoch(data["data"].last["t"])
-          .toString());
+      // debugPrint("Added a candle");
+      // debugPrint(DateTime.fromMillisecondsSinceEpoch(data["data"].last["t"])
+      // .toString());
 
       Candle candle = Candle(
           close: points.last,
@@ -152,11 +132,17 @@ class _TestPage3State extends State<TestPage3> {
   }
 
   void changeinterval(String value) {
-    setState(() {
-      _closeschannel();
-      print(resolutionMap2[value]!);
-      this.resolution = resolutionMap2[value]!;
-    });
+    print("Changing the resolution $value");
+
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => DetailsPage(
+                  stockName: widget.stockName,
+                  resolution: value,
+                )));
+
+    // _closeschannel();
   }
 
   var channel;
@@ -174,17 +160,15 @@ class _TestPage3State extends State<TestPage3> {
     channel = WebSocketChannel.connect(
       Uri.parse('wss://ws.finnhub.io?token=c6av1iaad3ieq36s0q9g'),
     );
-    print("build called");
-    print(resolution);
-    print(resolutionMap3[resolution]!);
     _addtochannel();
+    print("The widget resolution is ${widget.resolution}");
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text(widget.stockName.split(":")[1]),
       ),
       body: FutureBuilder(
-          future: getdata(resolution),
+          future: getdata(widget.resolution),
           builder:
               (BuildContext context, AsyncSnapshot<List<Candle>> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -202,7 +186,7 @@ class _TestPage3State extends State<TestPage3> {
                     if (snapshot1.hasData) {
                       if (addtocandle(snapshot1.data)) {
                         // print(candles[0]);
-                        print(resolutionMap3[resolution]!);
+                        // print(resolutionMap3[widget.resolution]!);
                         return Column(
                           children: [
                             AspectRatio(
@@ -210,10 +194,10 @@ class _TestPage3State extends State<TestPage3> {
                               child: Candlesticks(
                                 onIntervalChange: (String value) async {
                                   print(value);
-                                  changeinterval(value);
+                                  changeinterval(resolutionMap2[value]!);
                                 },
                                 candles: candles,
-                                interval: resolutionMap3[resolution]!,
+                                interval: resolutionMap3[widget.resolution]!,
                                 intervals: const [
                                   "1m",
                                   "5m",
@@ -229,7 +213,7 @@ class _TestPage3State extends State<TestPage3> {
                             const Divider(
                               thickness: 2,
                             ),
-                            priceDetail(
+                            PriceDetail(
                               isDown: isDown,
                               currentPrice: currentPrice,
                               currentHigh: currentHigh,
@@ -244,33 +228,51 @@ class _TestPage3State extends State<TestPage3> {
                           aspectRatio: 1.2,
                           child: Candlesticks(
                             onIntervalChange: (String value) async {
-                              print(value);
+                              print("the value is $value");
                             },
                             candles: snapshot.data!,
-                            interval: "1m",
+                            interval: widget.resolution,
                           ),
                         );
                       }
                     }
-                    return Container();
+                    return Center(child: const CircularProgressIndicator());
                   });
             } else {
               debugPrint("Did not get data from the API");
-              return const Center(
-                child: Text("An Error occured while calling the API"),
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => DetailsPage(
+                                    stockName: widget.stockName,
+                                    resolution: widget.resolution,
+                                  )),
+                        );
+                      },
+                      child: const Icon(Icons.replay_outlined),
+                    ),
+                    const Text("An Error occured while calling the API"),
+                  ],
+                ),
               );
             }
           }),
       floatingActionButton: FloatingActionButton(
         onPressed: _closeschannel,
-        child: Icon(Icons.close),
+        child: const Icon(Icons.close),
       ),
     );
   }
 }
 
-class priceDetail extends StatelessWidget {
-  const priceDetail({
+class PriceDetail extends StatelessWidget {
+  const PriceDetail({
     Key? key,
     required this.isDown,
     required this.currentPrice,

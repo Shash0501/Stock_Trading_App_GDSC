@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stock_trading_app/homepage.dart';
 import 'package:stock_trading_app/testpage2.dart';
-import 'package:stock_trading_app/testpage3.dart';
+import 'package:stock_trading_app/details_page.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -22,13 +22,12 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       create: (context) => StockBloc(),
       child: MaterialApp(
-          title: 'Flutter Demo',
-          theme: ThemeData(
-            brightness: Brightness.dark,
-          ),
-          home: TestPage3(
-            stockName: "BINANCE:ETHUSDT",
-          )),
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          brightness: Brightness.dark,
+        ),
+        home: HomePage(),
+      ),
     );
   }
 }
