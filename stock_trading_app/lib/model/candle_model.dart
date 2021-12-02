@@ -1,11 +1,12 @@
-class candle {
+class CandleModel {
   final int close;
   final int high;
   final int low;
   final int volume;
   final int open;
   final int time;
-  candle(
+
+  CandleModel(
       {required this.close,
       required this.open,
       required this.high,

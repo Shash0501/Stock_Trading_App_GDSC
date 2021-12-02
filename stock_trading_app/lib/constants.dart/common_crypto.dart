@@ -2,7 +2,7 @@
 // "displaySymbol": "MDT/BNB",
 // "symbol": "BINANCE:MDTBNB"
 
-import 'package:stock_trading_app/model/crypto_symbol.dart';
+import 'package:stock_trading_app/model/crypto_symbol_model.dart';
 
 List<CryptoSymbol> crypto_symbols = [
   CryptoSymbol(

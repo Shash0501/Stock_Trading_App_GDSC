@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:candlesticks/candlesticks.dart';
 import 'package:stock_trading_app/constants.dart/resolution.dart';
+import 'package:stock_trading_app/widget/details.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -28,19 +29,18 @@ class _DetailsPageState extends State<DetailsPage> {
   double previousClose = 0;
   bool isDown = false;
   // String resolution = "1";
-  late int last_updated;
+  late int lastUpdated;
   Future<List<Candle>> getdata(String res) async {
-    print("Getting initial Data $res");
     int a = DateTime.now().millisecondsSinceEpoch;
     int b = DateTime.now()
         .subtract(Duration(hours: 8 * resolutionMap[res]!))
         .millisecondsSinceEpoch;
     a = a ~/ 1000;
     b = b ~/ 1000;
-    last_updated = a;
+    lastUpdated = a;
     var response = await http.get(Uri.parse(
         "https://finnhub.io/api/v1/stock/candle?symbol=${widget.stockName}&resolution=$res&from=$b&to=$a&token=c6av1iaad3ieq36s0q9g"));
-    print(
+    debugPrint(
         "https://finnhub.io/api/v1/stock/candle?symbol=${widget.stockName}&resolution=$res&from=$b&to=$a&token=c6av1iaad3ieq36s0q9g");
     var data = json.decode(response.body);
     for (int i = data["o"].length - 1; i >= 0; i--) {
@@ -63,23 +63,31 @@ class _DetailsPageState extends State<DetailsPage> {
     if (last1 == "exit") {
       return false;
     }
-    // print((data["data"].last["t"] / 1000) - last_updated.toDouble());
     currentPrice = data["data"].last["p"].toDouble();
-    if ((data["data"].last["t"] / 1000).toDouble() - last_updated.toDouble() <=
+    if ((data["data"].last["t"] / 1000).toDouble() - lastUpdated.toDouble() <=
         60 * resolutionMap[widget.resolution]!) {
       points.add(data["data"].last["p"].toDouble());
+
       volume += data["data"].last["v"].toDouble();
+
       double high = data["data"].last["p"].toDouble() > candles[0].high
           ? data["data"].last["p"].toDouble()
           : candles[0].high;
+
       double low = data["data"].last["p"].toDouble() < candles[0].low
           ? data["data"].last["p"].toDouble()
           : candles[0].low;
+
       isDown = currentPrice > candles[0].open ? false : true;
+
       currentHigh = currentHigh > high ? currentHigh : high;
+
       currentLow = currentLow < low ? currentLow : low;
+
       currentOpen = candles[0].open;
+
       previousClose = candles[1].close;
+
       Candle candle = Candle(
           close: data["data"].last["p"].toDouble(),
           open: candles[0].open,
@@ -91,14 +99,9 @@ class _DetailsPageState extends State<DetailsPage> {
       candles.insert(0, candle);
       return true;
     } else {
-      double close = points.last.toDouble();
-      double open = points.first.toDouble();
       points.sort();
       double high = points.last.toDouble();
       double low = points.first.toDouble();
-      // debugPrint("Added a candle");
-      // debugPrint(DateTime.fromMillisecondsSinceEpoch(data["data"].last["t"])
-      // .toString());
 
       Candle candle = Candle(
           close: points.last,
@@ -113,7 +116,7 @@ class _DetailsPageState extends State<DetailsPage> {
       //Resetting the volume and points for next set of iterations
       points.clear();
       volume = 0;
-      last_updated = (data["data"].last["t"] / 1000).toInt();
+      lastUpdated = (data["data"].last["t"] / 1000).toInt();
       return true;
     }
   }
@@ -133,7 +136,6 @@ class _DetailsPageState extends State<DetailsPage> {
 
   void changeinterval(String value) {
     print("Changing the resolution $value");
-
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -141,8 +143,6 @@ class _DetailsPageState extends State<DetailsPage> {
                   stockName: widget.stockName,
                   resolution: value,
                 )));
-
-    // _closeschannel();
   }
 
   var channel;
@@ -150,8 +150,6 @@ class _DetailsPageState extends State<DetailsPage> {
   @override
   void dispose() {
     channel.sink.close();
-
-    // TODO: implement dispose
     super.dispose();
   }
 
@@ -161,7 +159,7 @@ class _DetailsPageState extends State<DetailsPage> {
       Uri.parse('wss://ws.finnhub.io?token=c6av1iaad3ieq36s0q9g'),
     );
     _addtochannel();
-    print("The widget resolution is ${widget.resolution}");
+    debugPrint("The widget resolution is ${widget.resolution}");
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -180,7 +178,7 @@ class _DetailsPageState extends State<DetailsPage> {
                     // print('${data}')
                     snapshot1.hasData
                         ? addtocandle(snapshot1.data)
-                        : print("null");
+                        : debugPrint("null");
 
                     // print(.length);
                     if (snapshot1.hasData) {
@@ -236,7 +234,7 @@ class _DetailsPageState extends State<DetailsPage> {
                         );
                       }
                     }
-                    return Center(child: const CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   });
             } else {
               debugPrint("Did not get data from the API");
@@ -294,285 +292,15 @@ class PriceDetail extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: 100,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: isDown ? Colors.red : Colors.green,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.grey[900],
-                      ),
-                      child: Column(
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.fromLTRB(0, 8.0, 0, 0),
-                            child: Text(
-                              "PRICE",
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: FittedBox(
-                              fit: BoxFit.fill,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(8.0, 2, 8, 8),
-                                child: Text(
-                                  currentPrice.toString(),
-                                  // overflow: TextOverflow.fade,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: isDown ? Colors.red : Colors.green,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: 100,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: isDown ? Colors.red : Colors.green,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.grey[900],
-                      ),
-                      child: Column(
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.fromLTRB(0, 8.0, 0, 0),
-                            child: Text(
-                              "CLOSE",
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: FittedBox(
-                              fit: BoxFit.fill,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(8.0, 2, 8, 8),
-                                child: Text(
-                                  previousClose.toString(),
-                                  // overflow: TextOverflow.fade,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: isDown ? Colors.red : Colors.green,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            PriceDetailWidget(isDown: isDown, currentPrice: currentPrice),
+            CloseDetailWidget(isDown: isDown, previousClose: previousClose),
           ],
         ),
         Row(
           children: [
-            Expanded(
-              flex: 1,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: 100,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: isDown ? Colors.red : Colors.green,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.grey[900],
-                      ),
-                      child: Column(
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.fromLTRB(0, 8.0, 0, 0),
-                            child: Text(
-                              "HIGH",
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: FittedBox(
-                              fit: BoxFit.fill,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(8.0, 2, 8, 8),
-                                child: Text(
-                                  currentHigh.toString(),
-                                  // overflow: TextOverflow.fade,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: isDown ? Colors.red : Colors.green,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: 100,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: isDown ? Colors.red : Colors.green,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.grey[900],
-                      ),
-                      child: Column(
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.fromLTRB(0, 8.0, 0, 0),
-                            child: Text(
-                              "LOW",
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: FittedBox(
-                              fit: BoxFit.fill,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(8.0, 2, 8, 8),
-                                child: Text(
-                                  currentLow.toString(),
-                                  // overflow: TextOverflow.fade,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: isDown ? Colors.red : Colors.green,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: 100,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: isDown ? Colors.red : Colors.green,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.grey[900],
-                      ),
-                      child: Column(
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.fromLTRB(0, 8.0, 0, 0),
-                            child: Text(
-                              "OPEN",
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: FittedBox(
-                              fit: BoxFit.fill,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(8.0, 2, 8, 8),
-                                child: Text(
-                                  currentOpen.toString(),
-                                  // overflow: TextOverflow.fade,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: isDown ? Colors.red : Colors.green,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            HighDetailWidget(isDown: isDown, currentHigh: currentHigh),
+            LowDetailWidget(isDown: isDown, currentLow: currentLow),
+            OpenDetailWidget(isDown: isDown, currentOpen: currentOpen),
           ],
         ),
       ],

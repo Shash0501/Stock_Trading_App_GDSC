@@ -9,8 +9,7 @@ import 'package:stock_trading_app/details_page.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:http/http.dart' as http;
 
-import 'bloc/stock_bloc.dart';
-import 'model/crypto_symbol.dart';
+import 'model/crypto_symbol_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -23,16 +22,18 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController _textFieldController = TextEditingController();
   String searchText = "";
   Future<List<dynamic>>? _searchedcryptoSymbols;
+
+  //? This function searches the cryptosymbols on user's input
   Future<List<dynamic>> fetchSearchedCryptos(String searchText) async {
     var searchedcrypto = [];
     try {
       var response = await http.get(Uri.parse(
           "https://finnhub.io/api/v1/search?q=Binance$searchText&token=c6av1iaad3ieq36s0q9g"));
+
       var data = json.decode(response.body);
-      print(data["result"]);
       searchedcrypto = data["result"];
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
     return searchedcrypto;
   }
@@ -155,11 +156,6 @@ class _HomePageState extends State<HomePage> {
               ? result(_searchedcryptoSymbols!)
               : Container(),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          BlocProvider.of<StockBloc>(context).add(getstocksymbolsEvent());
-        },
       ),
     );
   }
