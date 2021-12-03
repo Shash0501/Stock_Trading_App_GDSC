@@ -4,15 +4,17 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:stock_trading_app/constants.dart/channels.dart';
 import 'package:stock_trading_app/constants.dart/common_crypto.dart';
-import 'package:stock_trading_app/details_page.dart';
-import 'package:stock_trading_app/favourite_page.dart';
+import 'package:stock_trading_app/constants.dart/style.dart';
+import 'package:stock_trading_app/pages/details_page.dart';
+import 'package:stock_trading_app/pages/favourite_page.dart';
 import 'package:stock_trading_app/model/favourite_crypto.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:http/http.dart' as http;
 
-import 'model/crypto_symbol_model.dart';
+import '../model/crypto_symbol_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -46,11 +48,15 @@ class _HomePageState extends State<HomePage> {
     var box = Hive.box<Favourite>("favourite");
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text("NITK CRYPTO"),
         actions: [
           IconButton(
-            icon: const Icon(Icons.star),
+            icon: const Icon(
+              Icons.star,
+              color: Colors.yellow,
+            ),
             onPressed: () {
               Navigator.push(
                 context,
@@ -69,7 +75,7 @@ class _HomePageState extends State<HomePage> {
             child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 shrinkWrap: true,
-                itemCount: crypto_symbols.length,
+                itemCount: cryptoSymbols.length,
                 itemBuilder: (BuildContext context, int index) {
                   return InkWell(
                     onTap: () {
@@ -77,11 +83,11 @@ class _HomePageState extends State<HomePage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => DetailsPage(
-                                    symbol: crypto_symbols[index].symbol,
+                                    symbol: cryptoSymbols[index].symbol,
                                     description:
-                                        crypto_symbols[index].description,
+                                        cryptoSymbols[index].description,
                                     displaySymbol:
-                                        crypto_symbols[index].displaySymbol,
+                                        cryptoSymbols[index].displaySymbol,
                                   )));
                     },
                     child: Padding(
@@ -91,7 +97,7 @@ class _HomePageState extends State<HomePage> {
                           padding: const EdgeInsets.all(8.0),
                           child: Center(
                             child: Text(
-                              crypto_symbols[index].description.split(" ")[1],
+                              cryptoSymbols[index].description.split(" ")[1],
                               style: const TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold,
@@ -99,17 +105,7 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                         ),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            gradient: RadialGradient(
-                              colors: [
-                                Colors.amber[300]!,
-                                Colors.amber[400]!,
-                                Colors.amber[600]!,
-                                Colors.amber[700]!,
-                              ],
-                              stops: const [0.4, 0.6, 0.8, 1],
-                            )),
+                        decoration: bhp1,
                       ),
                     ),
                   );
@@ -119,7 +115,7 @@ class _HomePageState extends State<HomePage> {
             thickness: 2,
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 29.0),
+            padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 10.0),
             child: Container(
               height: 60.0,
               child: Card(
@@ -169,8 +165,70 @@ class _HomePageState extends State<HomePage> {
           ),
           _searchedcryptoSymbols != null
               ? result(_searchedcryptoSymbols!)
-              : Container(),
+              : favourites(),
         ],
+      ),
+    );
+  }
+
+  Widget favourites() {
+    var box = Hive.box<Favourite>("favourite");
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 25.0),
+      child: Container(
+        child: ValueListenableBuilder(
+          valueListenable: box.listenable(),
+          builder: (BuildContext context, dynamic box, _) {
+            return ListView.builder(
+              shrinkWrap: true,
+              itemCount: box.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => DetailsPage(
+                                    symbol: box.getAt(index).symbol,
+                                    description: box.getAt(index).description,
+                                    displaySymbol:
+                                        box.getAt(index).displaySymbol,
+                                  )));
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ListTile(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        tileColor: Colors.grey[600],
+                        title: Text(
+                          box.getAt(index).symbol,
+                          style: const TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(box.getAt(index).description,
+                            style: const TextStyle(color: Colors.black)),
+                        trailing: box.containsKey(box.getAt(index).symbol)
+                            ? IconButton(
+                                onPressed: () {
+                                  box.deleteAt(index);
+                                },
+                                icon: const Icon(
+                                  Icons.star,
+                                  color: Color(0xFFF2C611),
+                                ))
+                            : null,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+            ;
+          },
+        ),
       ),
     );
   }
@@ -223,7 +281,13 @@ class _HomePageState extends State<HomePage> {
         } else if (snapshot.hasError) {
           return Text("${snapshot.error}");
         }
-        return const Center(child: CircularProgressIndicator());
+        return const Center(
+            child: Padding(
+          padding: EdgeInsets.fromLTRB(8, 30, 8, 8),
+          child: CircularProgressIndicator(
+            color: Colors.cyan,
+          ),
+        ));
       },
     );
   }

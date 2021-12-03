@@ -9,7 +9,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:stock_trading_app/constants.dart/resolution.dart';
 import 'package:stock_trading_app/widget/details.dart';
 
-import 'model/favourite_crypto.dart';
+import '../model/favourite_crypto.dart';
 
 class DetailsPage extends StatefulWidget {
   final String symbol;
@@ -19,9 +19,7 @@ class DetailsPage extends StatefulWidget {
   DetailsPage(
       {required this.symbol,
       required this.description,
-      required this.displaySymbol}) {
-    debugPrint("----------|||||");
-  }
+      required this.displaySymbol});
   @override
   _DetailsPageState createState() => _DetailsPageState();
 }
@@ -139,34 +137,15 @@ class _DetailsPageState extends State<DetailsPage> {
 
   @override
   void initState() {
-    print("init..........");
     super.initState();
   }
 
   void _closeschannel() {
-    print("====================================");
-    for (int i = 0; i < box.length; i++) {
-      print(box.getAt(i)!.symbol);
-    }
-    print("====================================");
-
     channel.sink.close();
   }
 
   void changeinterval(String value) {
-    print("Changing the resolution $value");
     setState(() {
-      // Navigator.pop(context);
-      // Navigator.of(context)
-      //     .pushReplacement(MaterialPageRoute(builder: (BuildContext context) {
-      //   return DetailsPage(
-      //     symbol: widget.symbol,
-      //     resolution: value,
-      //     description: widget.description,
-      //     displaySymbol: widget.displaySymbol,
-      //   );
-      // }))
-      // Navigator.of(context).pus
       this.resolution = value;
     });
   }
@@ -185,9 +164,7 @@ class _DetailsPageState extends State<DetailsPage> {
       Uri.parse('wss://ws.finnhub.io?token=c6av1iaad3ieq36s0q9g'),
     );
     _addtochannel();
-    debugPrint("The widget resolution is ${resolution}");
     String a = resolution;
-    print("printitgsdfsasd f $a");
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -225,7 +202,10 @@ class _DetailsPageState extends State<DetailsPage> {
           builder:
               (BuildContext context, AsyncSnapshot<List<Candle>> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                  child: CircularProgressIndicator(
+                color: Colors.cyan,
+              ));
             } else if (snapshot.hasData) {
               print("building candles");
 
@@ -245,8 +225,6 @@ class _DetailsPageState extends State<DetailsPage> {
                               aspectRatio: 1.0,
                               child: Candlesticks(
                                 onIntervalChange: (String value) async {
-                                  debugPrint("-----------------");
-                                  print(value);
                                   return changeinterval(resolutionMap2[value]!);
                                   // return Future<void>(null);
                                 },
@@ -278,19 +256,43 @@ class _DetailsPageState extends State<DetailsPage> {
                           ],
                         );
                       } else {
-                        return AspectRatio(
-                          aspectRatio: 1.2,
-                          child: Candlesticks(
-                            onIntervalChange: (String value) async {
-                              print("the value is $value");
-                            },
-                            candles: snapshot.data!,
-                            interval: resolution,
-                          ),
+                        return Column(
+                          children: [
+                            AspectRatio(
+                              aspectRatio: 1.0,
+                              child: Candlesticks(
+                                onIntervalChange: (String value) async {
+                                  return changeinterval(resolutionMap2[value]!);
+                                  // return Future<void>(null);
+                                },
+                                candles: candles,
+                                interval: resolutionMap3[a]!,
+                                intervals: const [
+                                  "1m",
+                                  "5m",
+                                  "15m",
+                                  "30m",
+                                  "1h",
+                                  "1w",
+                                  "1M",
+                                  "1d"
+                                ],
+                              ),
+                            ),
+                            const Divider(
+                              thickness: 2,
+                            ),
+                            const CircularProgressIndicator(
+                              color: Colors.cyan,
+                            ),
+                          ],
                         );
                       }
                     }
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(
+                        child: CircularProgressIndicator(
+                      color: Colors.cyan,
+                    ));
                   });
             } else {
               debugPrint("Did not get data from the API");

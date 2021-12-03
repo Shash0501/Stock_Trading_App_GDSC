@@ -4,7 +4,7 @@
 
 import 'package:stock_trading_app/model/crypto_symbol_model.dart';
 
-List<CryptoSymbol> crypto_symbols = [
+List<CryptoSymbol> cryptoSymbols = [
   CryptoSymbol(
       description: "Binance ETH/USDT",
       displaySymbol: "ETH/USDT",
