@@ -3,9 +3,12 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
 import 'package:stock_trading_app/constants.dart/channels.dart';
 import 'package:stock_trading_app/constants.dart/common_crypto.dart';
 import 'package:stock_trading_app/details_page.dart';
+import 'package:stock_trading_app/favourite_page.dart';
+import 'package:stock_trading_app/model/favourite_crypto.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:http/http.dart' as http;
 
@@ -40,13 +43,22 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var box = Hive.box<Favourite>("favourite");
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("NITK CRYPTO"),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {},
+            icon: const Icon(Icons.star),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FavouritePage(),
+                ),
+              );
+            },
           )
         ],
       ),
@@ -65,8 +77,11 @@ class _HomePageState extends State<HomePage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => DetailsPage(
-                                    resolution: "1",
-                                    stockName: crypto_symbols[index].symbol,
+                                    symbol: crypto_symbols[index].symbol,
+                                    description:
+                                        crypto_symbols[index].description,
+                                    displaySymbol:
+                                        crypto_symbols[index].displaySymbol,
                                   )));
                     },
                     child: Padding(
@@ -161,6 +176,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget result(Future<List<dynamic>> cryptos) {
+    var box = Hive.box<Favourite>("favourite");
+
     return FutureBuilder<List<dynamic>>(
       future: cryptos,
       builder: (context, snapshot) {
@@ -181,13 +198,22 @@ class _HomePageState extends State<HomePage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => DetailsPage(
-                                    resolution: "1",
-                                    stockName: snapshot.data![index]['symbol'],
+                                    symbol: snapshot.data![index]['symbol'],
+                                    description: snapshot.data![index]
+                                        ['description'],
+                                    displaySymbol: snapshot.data![index]
+                                        ['displaySymbol'],
                                   )));
                     },
                     child: ListTile(
                       title: Text(snapshot.data![index]['symbol']),
                       subtitle: Text(snapshot.data![index]['description']),
+                      trailing: box.containsKey(snapshot.data![index]['symbol'])
+                          ? const Icon(
+                              Icons.star,
+                              color: Colors.yellow,
+                            )
+                          : null,
                     ),
                   );
                 },

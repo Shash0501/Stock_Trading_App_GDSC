@@ -1,24 +1,34 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+
 import 'package:candlesticks/candlesticks.dart';
-import 'package:stock_trading_app/constants.dart/resolution.dart';
-import 'package:stock_trading_app/widget/details.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:candlesticks/candlesticks.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import 'package:stock_trading_app/constants.dart/resolution.dart';
+import 'package:stock_trading_app/widget/details.dart';
+
+import 'model/favourite_crypto.dart';
+
 class DetailsPage extends StatefulWidget {
-  String stockName;
-  String resolution;
-  DetailsPage({required this.stockName, required this.resolution});
+  final String symbol;
+  final String description;
+  final String displaySymbol;
+
+  DetailsPage(
+      {required this.symbol,
+      required this.description,
+      required this.displaySymbol}) {
+    debugPrint("----------|||||");
+  }
   @override
   _DetailsPageState createState() => _DetailsPageState();
 }
 
 class _DetailsPageState extends State<DetailsPage> {
+  String resolution = "5";
+  var box = Hive.box<Favourite>("favourite");
   List<Candle> candles = [];
   List<double> points = [];
   double volume = 0;
@@ -31,6 +41,7 @@ class _DetailsPageState extends State<DetailsPage> {
   // String resolution = "1";
   late int lastUpdated;
   Future<List<Candle>> getdata(String res) async {
+    print("getting res $res");
     int a = DateTime.now().millisecondsSinceEpoch;
     int b = DateTime.now()
         .subtract(Duration(hours: 8 * resolutionMap[res]!))
@@ -39,10 +50,11 @@ class _DetailsPageState extends State<DetailsPage> {
     b = b ~/ 1000;
     lastUpdated = a;
     var response = await http.get(Uri.parse(
-        "https://finnhub.io/api/v1/stock/candle?symbol=${widget.stockName}&resolution=$res&from=$b&to=$a&token=c6av1iaad3ieq36s0q9g"));
+        "https://finnhub.io/api/v1/stock/candle?symbol=${widget.symbol}&resolution=$res&from=$b&to=$a&token=c6av1iaad3ieq36s0q9g"));
     debugPrint(
-        "https://finnhub.io/api/v1/stock/candle?symbol=${widget.stockName}&resolution=$res&from=$b&to=$a&token=c6av1iaad3ieq36s0q9g");
+        "https://finnhub.io/api/v1/stock/candle?symbol=${widget.symbol}&resolution=$res&from=$b&to=$a&token=c6av1iaad3ieq36s0q9g");
     var data = json.decode(response.body);
+    candles = [];
     for (int i = data["o"].length - 1; i >= 0; i--) {
       final date = DateTime.fromMillisecondsSinceEpoch(data["t"][i] * 1000);
       candles.add(Candle(
@@ -65,7 +77,7 @@ class _DetailsPageState extends State<DetailsPage> {
     }
     currentPrice = data["data"].last["p"].toDouble();
     if ((data["data"].last["t"] / 1000).toDouble() - lastUpdated.toDouble() <=
-        60 * resolutionMap[widget.resolution]!) {
+        60 * resolutionMap[resolution]!) {
       points.add(data["data"].last["p"].toDouble());
 
       volume += data["data"].last["v"].toDouble();
@@ -122,27 +134,41 @@ class _DetailsPageState extends State<DetailsPage> {
   }
 
   void _addtochannel() {
-    channel.sink.add('{"type": "subscribe", "symbol": "${widget.stockName}"}');
+    channel.sink.add('{"type": "subscribe", "symbol": "${widget.symbol}"}');
   }
 
   @override
   void initState() {
+    print("init..........");
     super.initState();
   }
 
   void _closeschannel() {
+    print("====================================");
+    for (int i = 0; i < box.length; i++) {
+      print(box.getAt(i)!.symbol);
+    }
+    print("====================================");
+
     channel.sink.close();
   }
 
   void changeinterval(String value) {
     print("Changing the resolution $value");
-    Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) => DetailsPage(
-                  stockName: widget.stockName,
-                  resolution: value,
-                )));
+    setState(() {
+      // Navigator.pop(context);
+      // Navigator.of(context)
+      //     .pushReplacement(MaterialPageRoute(builder: (BuildContext context) {
+      //   return DetailsPage(
+      //     symbol: widget.symbol,
+      //     resolution: value,
+      //     description: widget.description,
+      //     displaySymbol: widget.displaySymbol,
+      //   );
+      // }))
+      // Navigator.of(context).pus
+      this.resolution = value;
+    });
   }
 
   var channel;
@@ -159,43 +185,73 @@ class _DetailsPageState extends State<DetailsPage> {
       Uri.parse('wss://ws.finnhub.io?token=c6av1iaad3ieq36s0q9g'),
     );
     _addtochannel();
-    debugPrint("The widget resolution is ${widget.resolution}");
+    debugPrint("The widget resolution is ${resolution}");
+    String a = resolution;
+    print("printitgsdfsasd f $a");
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(widget.stockName.split(":")[1]),
+        title: Text(widget.symbol.split(":")[1]),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.star,
+              color:
+                  box.containsKey(widget.symbol) ? Colors.yellow : Colors.grey,
+            ),
+            onPressed: () {
+              if (box.containsKey(widget.symbol)) {
+                setState(() {
+                  box.delete(widget.symbol);
+                });
+              } else {
+                setState(() {
+                  box.put(
+                      widget.symbol,
+                      Favourite(
+                          symbol: widget.symbol,
+                          description: widget.description,
+                          displaySymbol: widget.displaySymbol));
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(snackBarWidget(box, widget.symbol));
+                });
+              }
+            },
+          ),
+        ],
       ),
       body: FutureBuilder(
-          future: getdata(widget.resolution),
+          future: getdata(resolution),
           builder:
               (BuildContext context, AsyncSnapshot<List<Candle>> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasData) {
+              print("building candles");
+
               return StreamBuilder(
                   stream: channel.stream,
                   builder: (context, snapshot1) {
-                    // print('${data}')
                     snapshot1.hasData
                         ? addtocandle(snapshot1.data)
                         : debugPrint("null");
 
-                    // print(.length);
                     if (snapshot1.hasData) {
                       if (addtocandle(snapshot1.data)) {
-                        // print(candles[0]);
-                        // print(resolutionMap3[widget.resolution]!);
+                        debugPrint("got data ${resolutionMap3[resolution]!}");
                         return Column(
                           children: [
                             AspectRatio(
                               aspectRatio: 1.0,
                               child: Candlesticks(
                                 onIntervalChange: (String value) async {
+                                  debugPrint("-----------------");
                                   print(value);
-                                  changeinterval(resolutionMap2[value]!);
+                                  return changeinterval(resolutionMap2[value]!);
+                                  // return Future<void>(null);
                                 },
                                 candles: candles,
-                                interval: resolutionMap3[widget.resolution]!,
+                                interval: resolutionMap3[a]!,
                                 intervals: const [
                                   "1m",
                                   "5m",
@@ -229,7 +285,7 @@ class _DetailsPageState extends State<DetailsPage> {
                               print("the value is $value");
                             },
                             candles: snapshot.data!,
-                            interval: widget.resolution,
+                            interval: resolution,
                           ),
                         );
                       }
@@ -248,8 +304,9 @@ class _DetailsPageState extends State<DetailsPage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => DetailsPage(
-                                    stockName: widget.stockName,
-                                    resolution: widget.resolution,
+                                    symbol: widget.symbol,
+                                    description: widget.description,
+                                    displaySymbol: widget.displaySymbol,
                                   )),
                         );
                       },
@@ -267,6 +324,22 @@ class _DetailsPageState extends State<DetailsPage> {
       ),
     );
   }
+}
+
+SnackBar snackBarWidget(var box, String symbol) {
+  return SnackBar(
+    backgroundColor: Colors.grey,
+    elevation: 2,
+    shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(10))),
+    content: const Text("Added to favourites"),
+    action: SnackBarAction(
+      label: "Undo",
+      onPressed: () {
+        box.deleteAt(box.indexOf(symbol));
+      },
+    ),
+  );
 }
 
 class PriceDetail extends StatelessWidget {
