@@ -25,7 +25,7 @@ class DetailsPage extends StatefulWidget {
 }
 
 class _DetailsPageState extends State<DetailsPage> {
-  String resolution = "5";
+  String resolution = "1";
   var box = Hive.box<Favourite>("favourite");
   List<Candle> candles = [];
   List<double> points = [];
@@ -36,6 +36,7 @@ class _DetailsPageState extends State<DetailsPage> {
   double currentOpen = 0;
   double previousClose = 0;
   bool isDown = false;
+  double percentage = 0;
   // String resolution = "1";
   late int lastUpdated;
   Future<List<Candle>> getdata(String res) async {
@@ -89,7 +90,7 @@ class _DetailsPageState extends State<DetailsPage> {
           : candles[0].low;
 
       isDown = currentPrice > candles[0].open ? false : true;
-
+      percentage = ((currentPrice - previousClose) / previousClose) * 100;
       currentHigh = currentHigh > high ? currentHigh : high;
 
       currentLow = currentLow < low ? currentLow : low;
@@ -221,71 +222,42 @@ class _DetailsPageState extends State<DetailsPage> {
                         debugPrint("got data ${resolutionMap3[resolution]!}");
                         return Column(
                           children: [
-                            AspectRatio(
-                              aspectRatio: 1.0,
-                              child: Candlesticks(
-                                onIntervalChange: (String value) async {
-                                  return changeinterval(resolutionMap2[value]!);
-                                  // return Future<void>(null);
-                                },
-                                candles: candles,
-                                interval: resolutionMap3[a]!,
-                                intervals: const [
-                                  "1m",
-                                  "5m",
-                                  "15m",
-                                  "30m",
-                                  "1h",
-                                  "1w",
-                                  "1M",
-                                  "1d"
-                                ],
+                            Row(
+                              children: [
+                                PriceDetailWidget(
+                                    isDown: isDown, currentPrice: currentPrice),
+                                HighDetailWidget(
+                                    isDown: isDown, currentHigh: currentHigh),
+                                LowDetailWidget(
+                                    isDown: isDown, currentLow: currentLow),
+                              ],
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.grey[600]!,
+                                  width: 1,
+                                ),
+                              ),
+                              child: AspectRatio(
+                                aspectRatio: MediaQuery.of(context).size.width /
+                                    (MediaQuery.of(context).size.height - 170),
+                                child: Candlesticks(
+                                    onIntervalChange: (String value) async {
+                                      return changeinterval(
+                                          resolutionMap2[value]!);
+                                      // return Future<void>(null);
+                                    },
+                                    candles: candles,
+                                    interval: resolutionMap3[a]!,
+                                    intervals: resolutionList),
                               ),
                             ),
-                            const Divider(
-                              thickness: 2,
-                            ),
-                            PriceDetail(
-                              isDown: isDown,
-                              currentPrice: currentPrice,
-                              currentHigh: currentHigh,
-                              currentLow: currentLow,
-                              currentOpen: currentOpen,
-                              previousClose: previousClose,
-                            )
                           ],
                         );
                       } else {
-                        return Column(
-                          children: [
-                            AspectRatio(
-                              aspectRatio: 1.0,
-                              child: Candlesticks(
-                                onIntervalChange: (String value) async {
-                                  return changeinterval(resolutionMap2[value]!);
-                                  // return Future<void>(null);
-                                },
-                                candles: candles,
-                                interval: resolutionMap3[a]!,
-                                intervals: const [
-                                  "1m",
-                                  "5m",
-                                  "15m",
-                                  "30m",
-                                  "1h",
-                                  "1w",
-                                  "1M",
-                                  "1d"
-                                ],
-                              ),
-                            ),
-                            const Divider(
-                              thickness: 2,
-                            ),
-                            const CircularProgressIndicator(
-                              color: Colors.cyan,
-                            ),
-                          ],
+                        return const CircularProgressIndicator(
+                          color: Colors.cyan,
                         );
                       }
                     }
@@ -320,10 +292,6 @@ class _DetailsPageState extends State<DetailsPage> {
               );
             }
           }),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _closeschannel,
-        child: const Icon(Icons.close),
-      ),
     );
   }
 }
@@ -344,41 +312,83 @@ SnackBar snackBarWidget(var box, String symbol) {
   );
 }
 
-class PriceDetail extends StatelessWidget {
-  const PriceDetail({
-    Key? key,
-    required this.isDown,
-    required this.currentPrice,
-    required this.previousClose,
-    required this.currentHigh,
-    required this.currentLow,
-    required this.currentOpen,
-  }) : super(key: key);
+// class PriceDetail extends StatelessWidget {
+//   const PriceDetail({
+//     Key? key,
+//     required this.isDown,
+//     required this.currentPrice,
+//     required this.previousClose,
+//     required this.currentHigh,
+//     required this.currentLow,
+//     required this.currentOpen,
+//   }) : super(key: key);
 
-  final bool isDown;
-  final double currentPrice;
-  final double previousClose;
-  final double currentHigh;
-  final double currentLow;
-  final double currentOpen;
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            PriceDetailWidget(isDown: isDown, currentPrice: currentPrice),
-            CloseDetailWidget(isDown: isDown, previousClose: previousClose),
-          ],
-        ),
-        Row(
-          children: [
-            HighDetailWidget(isDown: isDown, currentHigh: currentHigh),
-            LowDetailWidget(isDown: isDown, currentLow: currentLow),
-            OpenDetailWidget(isDown: isDown, currentOpen: currentOpen),
-          ],
-        ),
-      ],
-    );
-  }
-}
+//   final bool isDown;
+//   final double currentPrice;
+//   final double previousClose;
+//   final double currentHigh;
+//   final double currentLow;
+//   final double currentOpen;
+//   @override
+//   Widget build(BuildContext context) {
+//     String percentage =
+//         ((currentPrice - previousClose) / previousClose * 100).toString();
+
+//     return Expanded(
+//       child: Column(
+//         // crossAxisAlignment: CrossAxisAlignment.start,
+//         // mainAxisAlignment: MainAxisAlignment.start,
+//         children: [
+//           Expanded(
+//             // flex: 1,
+//             child: Row(
+//               mainAxisAlignment: MainAxisAlignment.start,
+//               children: [
+//                 Expanded(
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     // mainAxisAlignment: MainAxisAlignment.start,
+//                     children: [
+//                       PriceDetailWidget(
+//                           isDown: isDown, currentPrice: currentPrice),
+//                       HighDetailWidget(
+//                           isDown: isDown, currentHigh: currentHigh),
+//                       LowDetailWidget(isDown: isDown, currentLow: currentLow),
+//                     ],
+//                   ),
+//                 ),
+//                 Card(
+//                   elevation: 2,
+//                   child: Padding(
+//                     padding: const EdgeInsets.all(8.0),
+//                     child: Row(
+//                       children: [
+//                         Text(
+//                             "${percentage.substring(0, percentage.length % 4)} %",
+//                             style: const TextStyle(fontSize: 20)),
+//                         const SizedBox(
+//                           width: 10,
+//                         ),
+//                         Icon(
+//                           isDown ? Icons.arrow_downward : Icons.arrow_upward,
+//                           size: 30,
+//                           color: isDown ? Colors.red : Colors.green,
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ),
+//               ],
+//             ),
+//           ),
+//           Row(
+//             children: [
+//               OpenDetailWidget(isDown: isDown, currentOpen: currentOpen),
+//               CloseDetailWidget(isDown: isDown, previousClose: previousClose),
+//             ],
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }

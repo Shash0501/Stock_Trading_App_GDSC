@@ -20,20 +20,20 @@ class OpenDetailWidget extends StatelessWidget {
           height: 100,
           width: 100,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            // borderRadius: BorderRadius.circular(10),
             color: isDown ? Colors.red : Colors.green,
           ),
           child: Padding(
             padding: const EdgeInsets.all(2.0),
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
+                // // borderRadius: BorderRadius.circular(10),
                 color: Colors.grey[900],
               ),
-              child: Column(
+              child: Row(
                 children: [
                   const Padding(
-                    padding: EdgeInsets.fromLTRB(0, 8.0, 0, 0),
+                    padding: EdgeInsets.fromLTRB(4.0, 2.0, 0, 0),
                     child: Text(
                       "OPEN",
                       style: TextStyle(
@@ -47,7 +47,7 @@ class OpenDetailWidget extends StatelessWidget {
                     child: FittedBox(
                       fit: BoxFit.fill,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(8.0, 2, 8, 8),
+                        padding: const EdgeInsets.fromLTRB(8.0, 2, 8, 0),
                         child: Text(
                           currentOpen.toString(),
                           // overflow: TextOverflow.fade,
@@ -83,53 +83,46 @@ class LowDetailWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       flex: 1,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Container(
-          height: 100,
-          width: 100,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: isDown ? Colors.red : Colors.green,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.grey[900],
-              ),
-              child: Column(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(0, 8.0, 0, 0),
-                    child: Text(
-                      "LOW",
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
+      child: Container(
+        height: 50,
+        width: 165,
+        child: Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Container(
+            decoration: BoxDecoration(
+              // // borderRadius: BorderRadius.circular(10),
+              color: Colors.grey[900],
+            ),
+            child: Row(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(4.0, 2.0, 0, 0),
+                  child: Text(
+                    "LOW",
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
                     ),
                   ),
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.fill,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(8.0, 2, 8, 8),
-                        child: Text(
-                          currentLow.toString(),
-                          // overflow: TextOverflow.fade,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: isDown ? Colors.red : Colors.green,
-                          ),
+                ),
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.fill,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(8.0, 2, 8, 0),
+                      child: Text(
+                        currentLow.toString(),
+                        // overflow: TextOverflow.fade,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isDown ? Colors.red : Colors.green,
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -153,25 +146,20 @@ class HighDetailWidget extends StatelessWidget {
     return Expanded(
       flex: 1,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(6.0),
         child: Container(
-          height: 100,
-          width: 100,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: isDown ? Colors.red : Colors.green,
-          ),
+          height: 50,
+          width: 165,
           child: Padding(
             padding: const EdgeInsets.all(2.0),
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
                 color: Colors.grey[900],
               ),
-              child: Column(
+              child: Row(
                 children: [
                   const Padding(
-                    padding: EdgeInsets.fromLTRB(0, 8.0, 0, 0),
+                    padding: EdgeInsets.fromLTRB(4.0, 2.0, 0, 0),
                     child: Text(
                       "HIGH",
                       style: TextStyle(
@@ -185,7 +173,7 @@ class HighDetailWidget extends StatelessWidget {
                     child: FittedBox(
                       fit: BoxFit.fill,
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(8.0, 2, 8, 8),
+                        padding: const EdgeInsets.fromLTRB(8.0, 2, 8, 0),
                         child: Text(
                           currentHigh.toString(),
                           // overflow: TextOverflow.fade,
@@ -221,53 +209,46 @@ class CloseDetailWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       flex: 1,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Container(
-          height: 100,
-          width: 100,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: isDown ? Colors.red : Colors.green,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.grey[900],
-              ),
-              child: Column(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(0, 8.0, 0, 0),
-                    child: Text(
-                      "CLOSE",
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
+      child: Container(
+        height: 100,
+        width: 100,
+        child: Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Container(
+            decoration: BoxDecoration(
+              // // borderRadius: BorderRadius.circular(10),
+              color: Colors.grey[900],
+            ),
+            child: Row(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(4, 2.0, 0, 0),
+                  child: Text(
+                    "CLOSE",
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
                     ),
                   ),
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.fill,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(8.0, 2, 8, 8),
-                        child: Text(
-                          previousClose.toString(),
-                          // overflow: TextOverflow.fade,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: isDown ? Colors.red : Colors.green,
-                          ),
+                ),
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.fill,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(8.0, 2, 8, 0),
+                      child: Text(
+                        previousClose.toString(),
+                        // overflow: TextOverflow.fade,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isDown ? Colors.red : Colors.green,
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -289,54 +270,47 @@ class PriceDetailWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      flex: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Container(
-          height: 100,
-          width: 100,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: isDown ? Colors.red : Colors.green,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.grey[900],
-              ),
-              child: Column(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(0, 8.0, 0, 0),
-                    child: Text(
-                      "PRICE",
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
+      flex: 1,
+      child: Container(
+        height: 50,
+        width: 165,
+        child: Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Container(
+            decoration: BoxDecoration(
+              // // borderRadius: BorderRadius.circular(10),
+              color: Colors.grey[900],
+            ),
+            child: Row(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(4.0, 2.0, 0, 0),
+                  child: Text(
+                    "PRICE",
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
                     ),
                   ),
-                  Expanded(
-                    child: FittedBox(
-                      fit: BoxFit.fill,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(8.0, 2, 8, 8),
-                        child: Text(
-                          currentPrice.toString(),
-                          // overflow: TextOverflow.fade,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: isDown ? Colors.red : Colors.green,
-                          ),
+                ),
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.fill,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(8.0, 2, 8, 0),
+                      child: Text(
+                        currentPrice.toString(),
+                        // overflow: TextOverflow.fade,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isDown ? Colors.red : Colors.green,
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

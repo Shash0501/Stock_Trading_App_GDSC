@@ -30,3 +30,13 @@ Map<String, String> resolutionMap3 = {
   "M": "1M",
   "D": "1d"
 };
+List<String> resolutionList = const [
+  "1m",
+  "5m",
+  "15m",
+  "30m",
+  "1h",
+  "1w",
+  "1M",
+  "1d"
+];

@@ -183,44 +183,41 @@ class _HomePageState extends State<HomePage> {
               shrinkWrap: true,
               itemCount: box.length,
               itemBuilder: (BuildContext context, int index) {
-                return Expanded(
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => DetailsPage(
-                                    symbol: box.getAt(index).symbol,
-                                    description: box.getAt(index).description,
-                                    displaySymbol:
-                                        box.getAt(index).displaySymbol,
-                                  )));
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ListTile(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        tileColor: Colors.grey[600],
-                        title: Text(
-                          box.getAt(index).symbol,
-                          style: const TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(box.getAt(index).description,
-                            style: const TextStyle(color: Colors.black)),
-                        trailing: box.containsKey(box.getAt(index).symbol)
-                            ? IconButton(
-                                onPressed: () {
-                                  box.deleteAt(index);
-                                },
-                                icon: const Icon(
-                                  Icons.star,
-                                  color: Color(0xFFF2C611),
-                                ))
-                            : null,
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => DetailsPage(
+                                  symbol: box.getAt(index).symbol,
+                                  description: box.getAt(index).description,
+                                  displaySymbol: box.getAt(index).displaySymbol,
+                                )));
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
+                      tileColor: Colors.grey[600],
+                      title: Text(
+                        box.getAt(index).symbol,
+                        style: const TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(box.getAt(index).description,
+                          style: const TextStyle(color: Colors.black)),
+                      trailing: box.containsKey(box.getAt(index).symbol)
+                          ? IconButton(
+                              onPressed: () {
+                                box.deleteAt(index);
+                              },
+                              icon: const Icon(
+                                Icons.star,
+                                color: Color(0xFFF2C611),
+                              ))
+                          : null,
                     ),
                   ),
                 );
@@ -246,36 +243,35 @@ class _HomePageState extends State<HomePage> {
               child: Text("No results found"),
             );
           } else {
-            return Expanded(
-              child: ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return InkWell(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => DetailsPage(
-                                    symbol: snapshot.data![index]['symbol'],
-                                    description: snapshot.data![index]
-                                        ['description'],
-                                    displaySymbol: snapshot.data![index]
-                                        ['displaySymbol'],
-                                  )));
-                    },
-                    child: ListTile(
-                      title: Text(snapshot.data![index]['symbol']),
-                      subtitle: Text(snapshot.data![index]['description']),
-                      trailing: box.containsKey(snapshot.data![index]['symbol'])
-                          ? const Icon(
-                              Icons.star,
-                              color: Colors.yellow,
-                            )
-                          : null,
-                    ),
-                  );
-                },
-              ),
+            return ListView.builder(
+              shrinkWrap: true,
+              itemCount: snapshot.data!.length,
+              itemBuilder: (BuildContext context, int index) {
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => DetailsPage(
+                                  symbol: snapshot.data![index]['symbol'],
+                                  description: snapshot.data![index]
+                                      ['description'],
+                                  displaySymbol: snapshot.data![index]
+                                      ['displaySymbol'],
+                                )));
+                  },
+                  child: ListTile(
+                    title: Text(snapshot.data![index]['symbol']),
+                    subtitle: Text(snapshot.data![index]['description']),
+                    trailing: box.containsKey(snapshot.data![index]['symbol'])
+                        ? const Icon(
+                            Icons.star,
+                            color: Colors.yellow,
+                          )
+                        : null,
+                  ),
+                );
+              },
             );
           }
         } else if (snapshot.hasError) {
