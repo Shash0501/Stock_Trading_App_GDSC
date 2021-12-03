@@ -40,7 +40,6 @@ class _DetailsPageState extends State<DetailsPage> {
   // String resolution = "1";
   late int lastUpdated;
   Future<List<Candle>> getdata(String res) async {
-    print("getting res $res");
     int a = DateTime.now().millisecondsSinceEpoch;
     int b = DateTime.now()
         .subtract(Duration(hours: 8 * resolutionMap[res]!))
@@ -147,7 +146,7 @@ class _DetailsPageState extends State<DetailsPage> {
 
   void changeinterval(String value) {
     setState(() {
-      this.resolution = value;
+      resolution = value;
     });
   }
 
@@ -155,7 +154,7 @@ class _DetailsPageState extends State<DetailsPage> {
 
   @override
   void dispose() {
-    channel.sink.close();
+    _closeschannel();
     super.dispose();
   }
 
@@ -169,7 +168,7 @@ class _DetailsPageState extends State<DetailsPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(widget.symbol.split(":")[1]),
+        title: Text(widget.description),
         actions: [
           IconButton(
             icon: Icon(
@@ -256,8 +255,10 @@ class _DetailsPageState extends State<DetailsPage> {
                           ],
                         );
                       } else {
-                        return const CircularProgressIndicator(
-                          color: Colors.cyan,
+                        return const Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.cyan,
+                          ),
                         );
                       }
                     }

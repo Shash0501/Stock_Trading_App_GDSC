@@ -90,7 +90,6 @@ class LowDetailWidget extends StatelessWidget {
           padding: const EdgeInsets.all(2.0),
           child: Container(
             decoration: BoxDecoration(
-              // // borderRadius: BorderRadius.circular(10),
               color: Colors.grey[900],
             ),
             child: Row(

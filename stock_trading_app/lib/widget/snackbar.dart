@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 final SnackBar snackBar = SnackBar(
-  content: const Text('Added to Favorites'),
-  action: SnackBarAction(
-    label: 'Undo',
-    onPressed: () {},
+  backgroundColor: Colors.grey[600],
+  content: const Text(
+    'Added to Favorites',
+    style: TextStyle(
+        color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30),
   ),
 );

@@ -6,15 +6,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:stock_trading_app/constants.dart/channels.dart';
-import 'package:stock_trading_app/constants.dart/common_crypto.dart';
+import 'package:stock_trading_app/constants.dart/common_symbol.dart';
 import 'package:stock_trading_app/constants.dart/style.dart';
 import 'package:stock_trading_app/pages/details_page.dart';
 import 'package:stock_trading_app/pages/favourite_page.dart';
 import 'package:stock_trading_app/model/favourite_crypto.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:http/http.dart' as http;
-
-import '../model/crypto_symbol_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -26,14 +24,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController _textFieldController = TextEditingController();
   String searchText = "";
-  Future<List<dynamic>>? _searchedcryptoSymbols;
+  Future<List<dynamic>>? _searchedstockSymbols;
 
   //? This function searches the cryptosymbols on user's input
-  Future<List<dynamic>> fetchSearchedCryptos(String searchText) async {
+  Future<List<dynamic>> fetchSearchedStocks(String searchText) async {
     var searchedcrypto = [];
     try {
       var response = await http.get(Uri.parse(
-          "https://finnhub.io/api/v1/search?q=Binance$searchText&token=c6av1iaad3ieq36s0q9g"));
+          "https://finnhub.io/api/v1/search?q=$searchText&token=c6av1iaad3ieq36s0q9g"));
 
       var data = json.decode(response.body);
       searchedcrypto = data["result"];
@@ -50,7 +48,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text("NITK CRYPTO"),
+        title: const Text("NITK STOCKS"),
         actions: [
           IconButton(
             icon: const Icon(
@@ -75,7 +73,7 @@ class _HomePageState extends State<HomePage> {
             child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 shrinkWrap: true,
-                itemCount: cryptoSymbols.length,
+                itemCount: stockSymbols.length,
                 itemBuilder: (BuildContext context, int index) {
                   return InkWell(
                     onTap: () {
@@ -83,21 +81,22 @@ class _HomePageState extends State<HomePage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => DetailsPage(
-                                    symbol: cryptoSymbols[index].symbol,
+                                    symbol: stockSymbols[index].symbol,
                                     description:
-                                        cryptoSymbols[index].description,
+                                        stockSymbols[index].description,
                                     displaySymbol:
-                                        cryptoSymbols[index].displaySymbol,
+                                        stockSymbols[index].displaySymbol,
                                   )));
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
+                        width: 100,
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Center(
                             child: Text(
-                              cryptoSymbols[index].description.split(" ")[1],
+                              stockSymbols[index].displaySymbol,
                               style: const TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold,
@@ -130,7 +129,7 @@ class _HomePageState extends State<HomePage> {
                       labelStyle: const TextStyle(color: Colors.white),
                       labelText: _textFieldController.text == null ||
                               _textFieldController.text == ''
-                          ? 'Search cryptos'
+                          ? 'Search stocks'
                           : '',
                       suffixIcon: searchText == ""
                           ? const Icon(
@@ -144,7 +143,7 @@ class _HomePageState extends State<HomePage> {
                                 _textFieldController.clear();
                                 setState(() {
                                   searchText = "";
-                                  _searchedcryptoSymbols = null;
+                                  _searchedstockSymbols = null;
                                 });
                               },
                             ),
@@ -154,8 +153,7 @@ class _HomePageState extends State<HomePage> {
                     onChanged: (text) {
                       setState(() {
                         searchText = text;
-                        _searchedcryptoSymbols =
-                            fetchSearchedCryptos(searchText);
+                        _searchedstockSymbols = fetchSearchedStocks(searchText);
                       });
                     },
                   ),
@@ -163,8 +161,8 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          _searchedcryptoSymbols != null
-              ? result(_searchedcryptoSymbols!)
+          _searchedstockSymbols != null
+              ? result(_searchedstockSymbols!)
               : favourites(),
         ],
       ),
@@ -243,35 +241,37 @@ class _HomePageState extends State<HomePage> {
               child: Text("No results found"),
             );
           } else {
-            return ListView.builder(
-              shrinkWrap: true,
-              itemCount: snapshot.data!.length,
-              itemBuilder: (BuildContext context, int index) {
-                return InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => DetailsPage(
-                                  symbol: snapshot.data![index]['symbol'],
-                                  description: snapshot.data![index]
-                                      ['description'],
-                                  displaySymbol: snapshot.data![index]
-                                      ['displaySymbol'],
-                                )));
-                  },
-                  child: ListTile(
-                    title: Text(snapshot.data![index]['symbol']),
-                    subtitle: Text(snapshot.data![index]['description']),
-                    trailing: box.containsKey(snapshot.data![index]['symbol'])
-                        ? const Icon(
-                            Icons.star,
-                            color: Colors.yellow,
-                          )
-                        : null,
-                  ),
-                );
-              },
+            return Expanded(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: snapshot.data!.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => DetailsPage(
+                                    symbol: snapshot.data![index]['symbol'],
+                                    description: snapshot.data![index]
+                                        ['description'],
+                                    displaySymbol: snapshot.data![index]
+                                        ['displaySymbol'],
+                                  )));
+                    },
+                    child: ListTile(
+                      title: Text(snapshot.data![index]['symbol']),
+                      subtitle: Text(snapshot.data![index]['description']),
+                      trailing: box.containsKey(snapshot.data![index]['symbol'])
+                          ? const Icon(
+                              Icons.star,
+                              color: Colors.yellow,
+                            )
+                          : null,
+                    ),
+                  );
+                },
+              ),
             );
           }
         } else if (snapshot.hasError) {
